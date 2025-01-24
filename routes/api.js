@@ -47,23 +47,23 @@ module.exports = function (app) {
       let issue = await Issue.findById(_id);
       if(issue) {
         let toUpdate = false;
-        if(req.body.issue_title && req.body.issue_title !== issue.issue_title ) {
+        if(req.body.issue_title ) {
           issue.issue_title = req.body.issue_title;
           toUpdate = true;
         }
-        if(req.body.issue_text && req.body.issue_text !== issue.issue_text) {
+        if(req.body.issue_text ) {
           issue.issue_text = req.body.issue_text;
           toUpdate = true;
         }
-        if(req.body.created_by && req.body.created_by !== issue.created_by) {
+        if(req.body.created_by ) {
           issue.created_by = req.body.created_by;
           toUpdate = true;
         }
-        if(req.body.assigned_to && req.body.assigned_to !== issue.assigned_to) {
+        if(req.body.assigned_to ) {
           issue.assigned_to = req.body.assigned_to;
           toUpdate = true;
         }
-        if(req.body.status_text && req.body.status_text !== issue.status_text) {
+        if(req.body.status_text ) {
           issue.status_text = req.body.status_text;
           toUpdate = true;
         }
