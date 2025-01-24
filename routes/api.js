@@ -11,7 +11,7 @@ module.exports = function (app) {
       //console.log(cond);
       const issues = await Issue.find(cond);
       //console.log(issues);
-      res.json({issues: issues});
+      res.json(issues);
     })
     
     .post(async function (req, res){
@@ -25,13 +25,13 @@ module.exports = function (app) {
         issue.issue_title = req.body.issue_title;
         issue.issue_text = req.body.issue_text;
         issue.created_by = req.body.created_by;
-        issue.assigned_to = req.body.assigned_to;
-        issue.status_text = req.body.status_text;
+        issue.assigned_to = req.body.assigned_to ? req.body.assigned_to : '';
+        issue.status_text = req.body.status_text ? req.body.status_text : '';
+        issue.updated_on = issue.created_on;
         await issue.save();
-  
       }
       else { 
-        issue = {error: "missing required field(s) !"};
+        issue = {error: "required field(s) missing"};
       }
       
       res.json(issue);
@@ -39,43 +39,71 @@ module.exports = function (app) {
     
     .put(async function (req, res){
       //let project = req.params.project;
+      if(!req.body._id) {
+        res.json({error: 'missing _id'});
+        return;
+      }
       const _id = req.body._id;
-      const data = {};
-      if(req.body.issue_title) data.issue_title = req.body.issue_title;
-      if(req.body.issue_text) data.issue_text = req.body.issue_text;
-      if(req.body.created_by) data.created_by = req.body.created_by;
-      if(req.body.assigned_to) data.assigned_to = req.body.assign_to;
-      if(req.body.status_text) data.status_text = req.body.status_text;
-      if(req.body.open==="false") data.open = false;
-      //console.log(data);
       let issue = await Issue.findById(_id);
       if(issue) {
-        issue.updated_on = new Date();
-        if(data.issue_title) issue.issue_title = data.issue_title;
-        if(data.issue_text) issue.issue_text = data.issue_text;
-        if(data.created_by) issue.created_by = data.created_by;
-        if(data.assigned_to) issue.assigned_to = data.assign_to;
-        if(data.status_text) issue.status_text = data.status_text;
-        if(data.open===false) issue.open = false;
-        await issue.save();
+        let toUpdate = false;
+        if(req.body.issue_title && req.body.issue_title !== issue.issue_title ) {
+          issue.issue_title = req.body.issue_title;
+          toUpdate = true;
+        }
+        if(req.body.issue_text && req.body.issue_text !== issue.issue_text) {
+          issue.issue_text = req.body.issue_text;
+          toUpdate = true;
+        }
+        if(req.body.created_by && req.body.created_by !== issue.created_by) {
+          issue.created_by = req.body.created_by;
+          toUpdate = true;
+        }
+        if(req.body.assigned_to && req.body.assigned_to !== issue.assigned_to) {
+          issue.assigned_to = req.body.assigned_to;
+          toUpdate = true;
+        }
+        if(req.body.status_text && req.body.status_text !== issue.status_text) {
+          issue.status_text = req.body.status_text;
+          toUpdate = true;
+        }
+        const openSended = req.body.open==="false" ? false : true;
+        if(openSended != issue.open ) {
+          issue.open = openSended;
+          toUpdate = true;
+        }
+        if(toUpdate){
+          issue.updated_on = new Date();
+          await issue.save();
+          res.json({result: 'successfully updated', '_id': _id});
+        }
+        else{
+          res.json({ error: 'no update field(s) sent', '_id': _id });
+        }
         //console.log(issue);
       }
       else {
-        issue = {error: "Issue not found"};
+        res.json({error: 'could not update', '_id': _id});
       }
      
-      res.json(issue);
+      
     })
     
     .delete(async function (req, res){
       //let project = req.params.project;
+      if(!req.body._id) {
+        res.json({error: 'missing _id'});
+        return;
+      }
       const _id = req.body._id;
       let issue = await Issue.findOneAndDelete({_id: _id});
       if(!issue) {
-        issue = {error: "Issue not found"};
+        res.json({ error: 'could not delete', '_id': _id });
       }
-
-      res.json(issue);
+      else {
+        res.json({ result: 'successfully deleted', '_id': _id });
+      }
+      
     });
     
 };

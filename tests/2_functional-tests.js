@@ -32,7 +32,7 @@ suite('Functional Tests', function() {
         assert.equal(res.body.created_by,  'testc',);
         assert.equal(res.body.assigned_to, 'testa');
         assert.equal(res.body.status_text, 'status test');
-        assert.isUndefined(res.body.updated_on, 'updated_on undefined on creation');
+        assert.equal(res.body.updated_on, res.body.created_on);
         assert.strictEqual(res.body.open, true);
         assert.isBelow(new Date().getTime() - new Date(res.body.created_on).getTime(), 5000);
         done();
@@ -56,9 +56,9 @@ suite('Functional Tests', function() {
         assert.equal(res.body.issue_title, 'test only required fields');
         assert.equal(res.body.issue_text, 'text test  only required fields');
         assert.equal(res.body.created_by,  'testc');
-        assert.isUndefined(res.body.assigned_to, 'assigned_to not fill');
-        assert.isUndefined(res.body.status_text, 'status_text not fill');
-        assert.isUndefined(res.body.updated_on, 'updated_on undefined on creation');
+        assert.isEmpty(res.body.assigned_to, 'assigned_to not fill');
+        assert.isEmpty(res.body.status_text, 'status_text not fill');
+        assert.equal(res.body.updated_on, res.body.created_on);
         assert.strictEqual(res.body.open, true);
         assert.isBelow(new Date().getTime() - new Date(res.body.created_on).getTime(), 5000);
         done();
@@ -77,7 +77,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.error, 'missing required field(s) !');
+        assert.equal(res.body.error, 'required field(s) missing');
         done();
       });
   });
@@ -91,7 +91,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.isArray(res.body.issues, 'return an array of issues');
+        assert.isArray(res.body, 'return an array of issues');
         done();
       });
   });
@@ -105,7 +105,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.issues.length, res.body.issues.filter(el => el.open === true).length);
+        assert.equal(res.body.length, res.body.filter(el => el.open === true).length);
         done();
       });
   });
@@ -119,7 +119,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.issues.length, res.body.issues.filter(el => el.open === true && el.created_by === 'testc').length);
+        assert.equal(res.body.length, res.body.filter(el => el.open === true && el.created_by === 'testc').length);
         done();
       });
   });
@@ -144,8 +144,8 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.issue_title, 'test put updated');
-        assert.isBelow(new Date().getTime() - new Date(res.body.updated_on).getTime(), 5000);
+        assert.equal(res.body.result, 'successfully updated');
+        assert.equal(res.body._id, issue._id);
         done();
       });
   });
@@ -171,9 +171,8 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.issue_title, 'test put mod');
-        assert.equal(res.body.issue_text, 'text test put mod');
-        assert.isBelow(new Date().getTime() - new Date(res.body.updated_on).getTime(), 5000);
+        assert.equal(res.body.result, 'successfully updated');
+        assert.equal(res.body._id, issue._id);
         done();
       });
   });
@@ -192,7 +191,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.error, 'Issue not found');
+        assert.equal(res.body.error, 'missing _id');
         done();
       });
   });
@@ -217,7 +216,8 @@ suite('Functional Tests', function() {
         //console.log(res.body);
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.isBelow(new Date().getTime() - new Date(res.body.updated_on).getTime(), 5000);
+        assert.equal(res.body.error, 'no update field(s) sent');
+        assert.equal(res.body._id, issue._id);
         done();
       });
   });
@@ -237,7 +237,8 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.error, 'Issue not found');
+        assert.equal(res.body.error, 'could not update');
+        assert.equal(res.body._id, '00000f14fc0df4c8491f0000');
         done();
       });
   });
@@ -262,6 +263,7 @@ suite('Functional Tests', function() {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
         assert.equal(res.body._id, issue._id);
+        assert.equal(res.body.result, 'successfully deleted');
         done();
       });
   });
@@ -272,14 +274,15 @@ suite('Functional Tests', function() {
     chai
       .request(server)
       .keepOpen()
-      .put('/api/issues/apitest')
+      .delete('/api/issues/apitest')
       .send({
         _id: '00000f14fc0df4c8491f0000'
       })
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.error, 'Issue not found');
+        assert.equal(res.body.error, 'could not delete');
+        assert.equal(res.body._id, '00000f14fc0df4c8491f0000');
         done();
       });
   });
@@ -294,7 +297,7 @@ suite('Functional Tests', function() {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(res.type, "application/json");
-        assert.equal(res.body.error, 'Issue not found');
+        assert.equal(res.body.error, 'missing _id');
         done();
       });
   });
