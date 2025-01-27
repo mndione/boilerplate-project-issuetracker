@@ -88,6 +88,21 @@ module.exports = function (app) {
           res.json({ error: 'no update field(s) sent', '_id': _id });
         }
         */
+        if(req.body.issue_title ) {
+          issue.issue_title = req.body.issue_title;
+        }
+        if(req.body.issue_text ) {
+          issue.issue_text = req.body.issue_text;
+        }
+        if(req.body.created_by ) {
+          issue.created_by = req.body.created_by;
+        }
+        if(req.body.assigned_to ) {
+          issue.assigned_to = req.body.assigned_to;
+        }
+        if(req.body.status_text ) {
+          issue.status_text = req.body.status_text;
+        }
         const openSended = req.body.open==="false" ? false : true;
         issue.updated_on = new Date();
         issue.open = openSended;
