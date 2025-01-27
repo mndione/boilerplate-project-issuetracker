@@ -39,18 +39,20 @@ module.exports = function (app) {
     
     .put(async function (req, res){
       //let project = req.params.project;
+      //console.log(req.body, req.body.keys().length);
       if(!req.body._id) {
         res.json({error: 'missing _id'});
         return;
       }
-      else if(req.body.length === 1){
-        res.json({ error: 'no update field(s) sent', '_id': _id });
+      else if(Object.keys(req.body).length === 1){
+        res.json({ error: 'no update field(s) sent', '_id': req.body._id });
         return;
       }
       const _id = req.body._id;
       let issue = await Issue.findById(_id);
-      console.log(issue, req.body);
+      //console.log(issue, req.body);
       if(issue) {
+        /*
         let toUpdate = false;
         if(req.body.issue_title ) {
           issue.issue_title = req.body.issue_title;
@@ -85,6 +87,12 @@ module.exports = function (app) {
         else{
           res.json({ error: 'no update field(s) sent', '_id': _id });
         }
+        */
+        const openSended = req.body.open==="false" ? false : true;
+        issue.updated_on = new Date();
+        issue.open = openSended;
+        await issue.save();
+        res.json({result: 'successfully updated', '_id': _id});
         //console.log(issue);
       }
       else {
