@@ -84,7 +84,8 @@ module.exports = function (app) {
         //console.log(issue);
       }
       else {
-        res.json({ error: 'could not update', '_id': _id });
+        //res.json({ error: 'could not update', '_id': _id });
+        res.json({ '_id': _id });
       }
      
       
