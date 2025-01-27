@@ -239,7 +239,7 @@ suite('Functional Tests', function() {
         assert.equal(res.type, "application/json");
         //assert.equal(res.body.error, 'could not update');
         //assert.equal(res.body._id, '00000f14fc0df4c8491f0000');
-        assert.deepEqual(res.body, { _id: '00000f14fc0df4c8491f0000'})
+        assert.deepEqual(res.body, {error: 'could not update', _id: '00000f14fc0df4c8491f0000'})
         done();
       });
   });

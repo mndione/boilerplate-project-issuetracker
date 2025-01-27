@@ -43,9 +43,13 @@ module.exports = function (app) {
         res.json({error: 'missing _id'});
         return;
       }
+      else if(req.body.length === 1){
+        res.json({ error: 'no update field(s) sent', '_id': _id });
+        return;
+      }
       const _id = req.body._id;
       let issue = await Issue.findById(_id);
-      //console.log(issue, req.body);
+      console.log(issue, req.body);
       if(issue) {
         let toUpdate = false;
         if(req.body.issue_title ) {
@@ -84,8 +88,7 @@ module.exports = function (app) {
         //console.log(issue);
       }
       else {
-        //res.json({ error: 'could not update', '_id': _id });
-        res.json({ '_id': _id });
+        res.json({ error: 'could not update', '_id': _id });
       }
      
       
