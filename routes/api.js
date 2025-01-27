@@ -45,6 +45,7 @@ module.exports = function (app) {
       }
       const _id = req.body._id;
       let issue = await Issue.findById(_id);
+      //console.log(issue, req.body);
       if(issue) {
         let toUpdate = false;
         if(req.body.issue_title ) {
